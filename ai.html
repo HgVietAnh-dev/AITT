@@ -32,12 +32,12 @@
 <div class="section section--wide" style="padding-top: 40px;">
 
   <h1 class="heading-section text-center" style="margin-bottom: 6px;">🤖 AI Phân Tích Kỹ Năng Thuyết Trình</h1>
-  <p class="heading-sub text-center" style="margin-bottom: 36px;">Upload ảnh, video hoặc giọng nói — AI sẽ đánh giá và gợi ý cải thiện</p>
+  <p class="heading-sub text-center" style="margin-bottom: 36px;">Upload hình ảnh hoặc giọng nói — AI sẽ đánh giá và gợi ý cải thiện</p>
 
   <!-- Tabs -->
   <div class="ai-tabs">
     <button class="ai-tab active" data-tab="voice">🎙️ Giọng nói</button>
-    <button class="ai-tab" data-tab="image">📷 Hình ảnh / Video</button>
+    <button class="ai-tab" data-tab="image">📷 Hình ảnh</button>
     <button class="ai-tab" data-tab="chat">💬 Hỏi đáp AI</button>
   </div>
 
@@ -74,38 +74,34 @@
     </div>
   </div>
 
-  <!-- ===== TAB: IMAGE / VIDEO ===== -->
+  <!-- ===== TAB: IMAGE ===== -->
   <div class="ai-panel" id="panel-image">
     <div class="card" style="text-align: center;">
-      <h3 class="heading-tip" style="margin-top:0; justify-content: center;"><span class="num">📷</span> Phân tích hình ảnh &amp; video thuyết trình</h3>
+      <h3 class="heading-tip" style="margin-top:0; justify-content: center;"><span class="num">📷</span> Phân tích hình ảnh thuyết trình</h3>
       <p class="text-body text-center" style="max-width: 650px; margin: 0 auto 16px;">
-        Chọn ảnh hoặc video khi bạn đang thuyết trình. AI sẽ đánh giá tư thế, trang phục, nét mặt, ánh mắt, phong thái và đưa ra lời khuyên chi tiết.
+        Chọn ảnh khi bạn đang thuyết trình. AI sẽ đánh giá tư thế, trang phục, nét mặt, ánh mắt, phong thái và đưa ra lời khuyên chi tiết.
       </p>
 
-      <input type="file" id="imgInput" accept="image/*,video/*" style="display:none;" onchange="previewMedia()">
+      <input type="file" id="imgInput" accept="image/*" style="display:none;" onchange="previewImage()">
 
-      <div id="mediaFileName" class="file-badge" style="display:none;"></div>
+      <div id="imageFileName" class="file-badge" style="display:none;"></div>
 
       <div class="preview-area">
         <img id="imgPreview" alt="Preview ảnh">
-        <video id="videoPreview" controls></video>
       </div>
 
-      <!-- Nút upload ảnh + upload video + phân tích cạnh nhau -->
+      <!-- Nút upload ảnh + phân tích cạnh nhau -->
       <div class="action-row">
-        <button class="btn btn--upload" onclick="pickFile('image')">
+        <button class="btn btn--upload" onclick="document.getElementById('imgInput').click()">
           📷 Chọn ảnh
         </button>
-        <button class="btn btn--upload" onclick="pickFile('video')">
-          📹 Chọn video
-        </button>
         <button class="btn btn--primary" id="btnImage" onclick="analyzeImage()">
-          🚀 Phân tích
+          🚀 Phân tích hình ảnh
         </button>
       </div>
 
       <div class="result-card" id="imageResult" style="display:none; text-align: left;">
-        <div class="result-card__title">📊 Kết quả phân tích</div>
+        <div class="result-card__title">📊 Kết quả phân tích hình ảnh</div>
         <div class="result-card__body" id="imageResultBody"></div>
       </div>
     </div>
@@ -188,41 +184,20 @@ function previewAudio() {
   }
 }
 
-/* Image/Video preview */
-function previewMedia() {
+/* Image preview */
+function previewImage() {
   const f = document.getElementById('imgInput').files[0];
   const img = document.getElementById('imgPreview');
-  const vid = document.getElementById('videoPreview');
-  const badge = document.getElementById('mediaFileName');
+  const badge = document.getElementById('imageFileName');
   if (!f) return;
 
-  // Reset both
-  img.style.display = 'none'; img.src = '';
-  vid.style.display = 'none'; vid.src = '';
-
   if (badge) {
-    badge.textContent = (f.type.startsWith('video/') ? '📹 Đã chọn: ' : '📸 Đã chọn: ') + f.name;
+    badge.textContent = '📸 Đã chọn: ' + f.name;
     badge.style.display = 'inline-flex';
   }
 
-  if (f.type.startsWith('video/')) {
-    vid.src = URL.createObjectURL(f);
-    vid.style.display = 'block';
-  } else {
-    img.src = URL.createObjectURL(f);
-    img.style.display = 'block';
-  }
-}
-
-/* Pick file by type */
-function pickFile(type) {
-  const input = document.getElementById('imgInput');
-  if (type === 'image') {
-    input.accept = 'image/*';
-  } else {
-    input.accept = 'video/*';
-  }
-  input.click();
+  img.src = URL.createObjectURL(f);
+  img.style.display = 'block';
 }
 
 /* ---- MARKDOWN ---- */
@@ -292,36 +267,28 @@ Sau bảng viết: **Điểm tổng**, **Điểm mạnh** (2-3), **Cần cải t
   }
 }
 
-/* ---- IMAGE/VIDEO ANALYSIS ---- */
+/* ---- IMAGE ANALYSIS ---- */
 async function analyzeImage() {
   const fileInput = document.getElementById('imgInput');
   const card = document.getElementById('imageResult');
   const body = document.getElementById('imageResultBody');
   const btn = document.getElementById('btnImage');
 
-  if (!fileInput.files[0]) { card.style.display='block'; body.innerHTML='⚠️ Vui lòng chọn ảnh hoặc video!'; return; }
+  if (!fileInput.files[0]) { card.style.display='block'; body.innerHTML='⚠️ Vui lòng chọn ảnh!'; return; }
 
   const file = fileInput.files[0];
-  const isVideo = file.type.startsWith('video/');
-
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Đang phân tích...';
   card.style.display = 'block';
-  body.innerHTML = '<div class="loading-dots">⏳ AI đang quan sát và phân tích</div>';
+  body.innerHTML = '<div class="loading-dots">⏳ AI đang quan sát và phân tích hình ảnh</div>';
 
   try {
-    if (isVideo) {
-      // Video: capture a frame then analyze as image
-      const frame = await captureVideoFrame(file);
-      await sendImageAnalysis(frame, body);
-    } else {
-      const base64 = await toBase64(file);
-      await sendImageAnalysis(base64, body);
-    }
+    const base64 = await toBase64(file);
+    await sendImageAnalysis(base64, body);
   } catch (err) {
     body.innerHTML = '❌ Lỗi: ' + err.message;
   } finally {
-    btn.disabled = false; btn.innerHTML = '🚀 Phân tích';
+    btn.disabled = false; btn.innerHTML = '🚀 Phân tích hình ảnh';
   }
 }
 
@@ -363,28 +330,6 @@ Sau bảng viết: **Điểm tổng**, **Ấn tượng đầu tiên**, **Điểm
   if (!res.ok) { body.innerHTML = '❌ Lỗi API: ' + res.statusText; return; }
   const data = await res.json();
   body.innerHTML = renderMD(data.choices[0].message.content);
-}
-
-/* Capture frame from video */
-function captureVideoFrame(file) {
-  return new Promise((resolve, reject) => {
-    const video = document.createElement('video');
-    video.preload = 'metadata';
-    video.muted = true;
-    video.src = URL.createObjectURL(file);
-    video.onloadeddata = () => {
-      video.currentTime = Math.min(1, video.duration / 2);
-    };
-    video.onseeked = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
-      URL.revokeObjectURL(video.src);
-    };
-    video.onerror = reject;
-  });
 }
 
 /* ---- CHATBOT ---- */
